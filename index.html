@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Armonía Financiera | Control Presupuestal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #5e35b1;
+            --primary-light: #7e57c2;
+            --secondary: #26a69a;
+            --dark: #263238;
+            --darker: #1a2327;
+            --gray: #455a64;
+            --light-gray: #cfd8dc;
+            --text: #eceff1;
+            --text-light: #b0bec5;
+            --success: #66bb6a;
+            --warning: #ffa726;
+            --error: #ef5350;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: linear-gradient(135deg, var(--darker), var(--dark));
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+        
+        header::after {
+            content: '';
+            display: block;
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            margin: 1rem auto 0;
+            border-radius: 2px;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary-light), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+        
+        .subtitle {
+            color: var(--text-light);
+            font-weight: 400;
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        @media (max-width: 900px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .card {
+            background: rgba(38, 50, 56, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 1.8rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.4s, box-shadow 0.4s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(94, 53, 177, 0.3);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(207, 216, 220, 0.1);
+        }
+        
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            box-shadow: 0 4px 12px rgba(94, 53, 177, 0.4);
+        }
+        
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        
+        .card-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.2s;
+        }
+        
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: var(--text);
+            transform: translateY(-2px);
+        }
+        
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 0.6rem;
+            font-weight: 500;
+            color: var(--text-light);
+            font-size: 0.95rem;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            background: rgba(69, 90, 100, 0.4);
+            border: 1px solid rgba(207, 216, 220, 0.1);
+            border-radius: 10px;
+            font-size: 1rem;
+            color: var(--text);
+            font-family: 'Quicksand', sans-serif;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 2px rgba(126, 87, 194, 0.3);
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(94, 53, 177, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+            box-shadow: 0 6px 20px rgba(94, 53, 177, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid rgba(207, 216, 220, 0.2);
+            color: var(--text-light);
+            box-shadow: none;
+            margin-top: 0.8rem;
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--primary-light);
+            color: var(--text);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 280px;
+            margin-top: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(207, 216, 220, 0.1);
+        }
+        
+        th {
+            background: rgba(26, 35, 39, 0.6);
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(26, 35, 39, 0.8);
+            color: var(--text-light);
+        }
+        
+        .expense-list {
+            margin-top: 1rem;
+        }
+        
+        .expense-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(207, 216, 220, 0.1);
+        }
+        
+        .expense-item:last-child {
+            border-bottom: none;
+        }
+        
+        .expense-info {
+            flex: 1;
+        }
+        
+        .expense-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .expense-category {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 0.3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .category-color {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .expense-description {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            font-style: italic;
+        }
+        
+        .expense-date {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            text-align: right;
+            min-width: 100px;
+        }
+        
+        .negative {
+            color: var(--error);
+        }
+        
+        .positive {
+            color: var(--success);
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(207, 216, 220, 0.1);
+        }
+        
+        .tab {
+            padding: 0.7rem 1.2rem;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab.active {
+            color: var(--text);
+            border-bottom: 3px solid var(--primary-light);
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-light);
+        }
+        
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+        
+        .sync-notice {
+            background: rgba(38, 166, 154, 0.15);
+            border-left: 4px solid var(--secondary);
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        
+        .sync-icon {
+            margin-right: 0.8rem;
+            color: var(--secondary);
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateY(100px);
+            opacity: 0;
+            animation: slideIn 0.3s forwards;
+            z-index: 1000;
+        }
+        
+        .notification.success {
+            background-color: var(--success);
+        }
+        
+        .notification.error {
+            background-color: var(--error);
+        }
+        
+        .notification.info {
+            background-color: var(--primary);
+        }
+        
+        .notification.warning {
+            background-color: var(--warning);
+        }
+        
+        .fade-out {
+            animation: fadeOut 0.5s forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes slideIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Armonía Financiera</h1>
+            <p class="subtitle">Donde cada gasto y ahorro encuentra su equilibrio perfecto</p>
+        </header>
+        
+        <div class="dashboard">
+            <!-- Panel de Control -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                            <polyline points="13 2 13 9 20 9"></polyline>
+                        </svg>
+                    </div>
+                    <h2 class="card-title">Panel de Control</h2>
+                    <div class="card-actions">
+                        <button id="exportBtn" class="btn-icon" title="Exportar datos">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                <polyline points="7 10 12 15 17 10"></polyline>
+                                <line x1="12" y1="15" x2="12" y2="3"></line>
+                            </svg>
+                        </button>
+                        <label for="importInput" class="btn-icon" title="Importar datos">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7"></path>
+                                <polyline points="15 3 21 3 21 9"></polyline>
+                                <line x1="10" y1="14" x2="21" y2="3"></line>
+                            </svg>
+                            <input id="importInput" type="file" accept=".json" style="display: none;">
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <label class="input-label">Ingreso Mensual (USD)</label>
+                    <input type="number" id="income" class="input-field" placeholder="3000.00" step="0.01">
+                </div>
+                
+                <button id="addIncomeBtn" class="btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    Añadir Ingreso
+                </button>
+                
+                <button id="calculateBtn" class="btn btn-secondary">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                        <line x1="12" y1="20" x2="12" y2="10"></line>
+                        <line x1="18" y1="20" x2="18" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="16"></line>
+                    </svg>
+                    Calcular Presupuesto
+                </button>
+                
+                <div id="budgetResults" class="hidden" style="margin-top: 2rem;">
+                    <div class="input-group">
+                        <label class="input-label">Registrar Gasto</label>
+                        <select id="expenseCategory" class="input-field">
+                            <option value="">Selecciona categoría</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Monto del gasto</label>
+                        <input type="number" id="expenseAmount" class="input-field" placeholder="50.00" step="0.01">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label class="input-label">Descripción (opcional)</label>
+                        <textarea id="expenseDescription" class="input-field" rows="3" placeholder="¿En qué gastaste este dinero?"></textarea>
+                    </div>
+                    
+                    <button id="registerExpenseBtn" class="btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="12" y1="18" x2="12" y2="12"></line>
+                            <line x1="9" y1="15" x2="15" y2="15"></line>
+                        </svg>
+                        Registrar Gasto
+                    </button>
+                    
+                    <div class="sync-notice">
+                        <svg class="sync-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                            <path d="M3 3v5h5"></path>
+                            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+                            <path d="M16 16h5v5"></path>
+                        </svg>
+                        <span>Todos los datos se guardan automáticamente</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Distribución Presupuestaria -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path>
+                            <path d="M22 12A10 10 0 0 0 12 2v10z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="card-title">Distribución</h2>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="budgetChart"></canvas>
+                </div>
+                
+                <table id="budgetTable">
+                    <thead>
+                        <tr>
+                            <th>Categoría</th>
+                            <th>Disponible</th>
+                            <th>Usado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Historial de Gastos e Ingresos -->
+            <div class="card" style="grid-column: span 2;">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 16 12 14 15 10 9 8 12 2 12"></polyline>
+                            <path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="card-title">Historial de Transacciones</h2>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" data-tab="today">Hoy</div>
+                    <div class="tab" data-tab="week">Semana</div>
+                    <div class="tab" data-tab="month">Mes</div>
+                    <div class="tab" data-tab="all">Todos</div>
+                </div>
+                
+                <div id="todayTab" class="tab-content active">
+                    <div id="todayTransactions" class="expense-list">
+                    </div>
+                </div>
+                
+                <div id="weekTab" class="tab-content">
+                    <div id="weekTransactions" class="expense-list">
+                    </div>
+                </div>
+                
+                <div id="monthTab" class="tab-content">
+                    <div id="monthTransactions" class="expense-list">
+                    </div>
+                </div>
+                
+                <div id="allTab" class="tab-content">
+                    <div id="allTransactions" class="expense-list">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuración de categorías
+        const categories = [
+            { id: 1, name: "Gastos Personales", percentage: 30, color: "#5e35b1" },
+            { id: 2, name: "Gastos de Ocio", percentage: 5, color: "#26a69a" },
+            { id: 3, name: "Ahorro Emergencia", percentage: 10, color: "#42a5f5" },
+            { id: 4, name: "Inversión", percentage: 5, color: "#ec407a" },
+            { id: 5, name: "Gastos Compartidos", percentage: 10, color: "#ffa726" },
+            { id: 6, name: "Pago Empleados", percentage: 25, color: "#66bb6a" },
+            { id: 7, name: "Capital Empresa", percentage: 15, color: "#7e57c2" }
+        ];
+
+        // Cache de elementos DOM
+        const domCache = {
+            incomeInput: document.getElementById('income'),
+            budgetResults: document.getElementById('budgetResults'),
+            expenseCategory: document.getElementById('expenseCategory'),
+            expenseAmount: document.getElementById('expenseAmount'),
+            expenseDescription: document.getElementById('expenseDescription'),
+            budgetTable: document.querySelector('#budgetTable tbody'),
+            budgetChartCtx: document.getElementById('budgetChart').getContext('2d'),
+            calculateBtn: document.getElementById('calculateBtn'),
+            addIncomeBtn: document.getElementById('addIncomeBtn'),
+            registerExpenseBtn: document.getElementById('registerExpenseBtn'),
+            exportBtn: document.getElementById('exportBtn'),
+            importInput: document.getElementById('importInput'),
+            tabsContainer: document.querySelector('.tabs'),
+            tabContents: {
+                today: document.getElementById('todayTab'),
+                week: document.getElementById('weekTab'),
+                month: document.getElementById('monthTab'),
+                all: document.getElementById('allTab')
+            },
+            transactionContainers: {
+                today: document.getElementById('todayTransactions'),
+                week: document.getElementById('weekTransactions'),
+                month: document.getElementById('monthTransactions'),
+                all: document.getElementById('allTransactions')
+            }
+        };
+
+        let budgetChart = null;
+        let currentBudget = null;
+        let totalIncome = 0;
+        
+        // Clase para manejar el almacenamiento local
+        class LocalStorageManager {
+            static get(key) {
+                try {
+                    const data = localStorage.getItem(key);
+                    return data ? JSON.parse(data) : null;
+                } catch (e) {
+                    console.error(`Error al leer ${key} de localStorage`, e);
+                    return null;
+                }
+            }
+
+            static set(key, value) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                    return true;
+                } catch (e) {
+                    console.error(`Error al guardar ${key} en localStorage`, e);
+                    return false;
+                }
+            }
+        }
+
+        // Sistema de notificaciones
+        const NotificationSystem = {
+            show: function(message, type = 'info', duration = 3000) {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('fade-out');
+                    notification.addEventListener('animationend', () => {
+                        notification.remove();
+                    }, { once: true });
+                }, duration);
+            }
+        };
+
+        // Función para validar inputs
+        function validateInputs(inputs) {
+            const errors = [];
+            
+            inputs.forEach(input => {
+                const { value, type, required, min, max, element } = input;
+                
+                if (required && !value) {
+                    errors.push(`El campo ${element.id} es requerido`);
+                    element.classList.add('pulse');
+                    setTimeout(() => element.classList.remove('pulse'), 1000);
+                    return;
+                }
+                
+                if (type === 'number') {
+                    const numValue = parseFloat(value);
+                    if (isNaN(numValue)) {
+                        errors.push(`El campo ${element.id} debe ser un número`);
+                        element.classList.add('pulse');
+                        setTimeout(() => element.classList.remove('pulse'), 1000);
+                    } else if (min !== undefined && numValue < min) {
+                        errors.push(`El campo ${element.id} debe ser mayor o igual a ${min}`);
+                        element.classList.add('pulse');
+                        setTimeout(() => element.classList.remove('pulse'), 1000);
+                    } else if (max !== undefined && numValue > max) {
+                        errors.push(`El campo ${element.id} debe ser menor o igual a ${max}`);
+                        element.classList.add('pulse');
+                        setTimeout(() => element.classList.remove('pulse'), 1000);
+                    }
+                }
+            });
+            
+            return errors;
+        }
+
+        // Función para cargar el presupuesto
+        function loadBudget() {
+            currentBudget = LocalStorageManager.get('currentBudget');
+            totalIncome = LocalStorageManager.get('totalIncome') || 0;
+            
+            if (currentBudget) {
+                displayBudget(currentBudget);
+                domCache.budgetResults.classList.remove('hidden');
+                updateCategorySelect();
+            }
+        }
+
+        // Función para añadir un ingreso
+        function addIncome() {
+            const income = parseFloat(domCache.incomeInput.value);
+            
+            const errors = validateInputs([
+                {
+                    value: domCache.incomeInput.value,
+                    type: 'number',
+                    required: true,
+                    min: 0.01,
+                    element: domCache.incomeInput
+                }
+            ]);
+            
+            if (errors.length > 0) {
+                errors.forEach(error => NotificationSystem.show(error, 'error'));
+                return;
+            }
+            
+            // Registrar el ingreso
+            const incomeRecord = {
+                id: Date.now(),
+                amount: income,
+                date: new Date().toISOString(),
+                type: 'income'
+            };
+            
+            // Guardar en localStorage
+            const incomes = LocalStorageManager.get('incomes') || [];
+            incomes.unshift(incomeRecord);
+            LocalStorageManager.set('incomes', incomes);
+            
+            // Actualizar ingreso total
+            totalIncome += income;
+            LocalStorageManager.set('totalIncome', totalIncome);
+            
+            // Limpiar input
+            domCache.incomeInput.value = '';
+            
+            // Mostrar notificación
+            NotificationSystem.show(
+                `Ingreso de $${income.toFixed(2)} registrado correctamente`,
+                'success'
+            );
+            
+            // Actualizar UI
+            updateUI();
+        }
+
+        // Función para calcular el presupuesto
+        function calculateBudget() {
+            if (totalIncome <= 0) {
+                NotificationSystem.show("Primero debes registrar ingresos", 'error');
+                return;
+            }
+            
+            // Calcular montos para cada categoría
+            currentBudget = categories.map(cat => ({
+                id: cat.id,
+                name: cat.name,
+                percentage: cat.percentage,
+                total: (totalIncome * cat.percentage) / 100,
+                used: getCategoryUsed(cat.id),
+                remaining: (totalIncome * cat.percentage) / 100 - getCategoryUsed(cat.id),
+                color: cat.color
+            }));
+            
+            // Mostrar resultados
+            displayBudget(currentBudget);
+            
+            // Guardar presupuesto
+            LocalStorageManager.set('currentBudget', currentBudget);
+            
+            // Mostrar sección de gastos
+            domCache.budgetResults.classList.remove('hidden');
+            
+            // Actualizar select de categorías
+            updateCategorySelect();
+            
+            // Mostrar notificación
+            NotificationSystem.show("Presupuesto calculado correctamente", 'success');
+        }
+
+        // Función para obtener el gasto de una categoría
+        function getCategoryUsed(categoryId) {
+            const expenses = LocalStorageManager.get('expenses') || [];
+            return expenses
+                .filter(exp => exp.categoryId === categoryId)
+                .reduce((sum, exp) => sum + exp.amount, 0);
+        }
+
+        // Función para mostrar el presupuesto
+        function displayBudget(budgetData) {
+            const tableBody = domCache.budgetTable;
+            tableBody.innerHTML = '';
+            
+            budgetData.forEach(cat => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                        <span class="category-color" style="background: ${cat.color}"></span>
+                        ${cat.name}
+                    </td>
+                    <td class="${cat.remaining < cat.total * 0.2 ? 'negative' : ''}">
+                        $${cat.remaining.toFixed(2)}
+                    </td>
+                    <td>$${cat.used.toFixed(2)}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Crear/actualizar gráfico
+            renderChart(budgetData);
+        }
+
+        // Configuración del gráfico
+        const chartConfig = {
+            type: 'doughnut',
+            data: {
+                labels: [],
+                datasets: [{
+                    data: [],
+                    backgroundColor: [],
+                    borderColor: 'rgba(26, 35, 39, 0.8)',
+                    borderWidth: 1,
+                    hoverOffset: 12
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--text'),
+                            font: {
+                                family: 'Quicksand',
+                                weight: '500'
+                            },
+                            padding: 16,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const cat = currentBudget.find(c => c.name === context.label);
+                                return [
+                                    `Total: $${cat.total.toFixed(2)}`,
+                                    `Usado: $${cat.used.toFixed(2)} (${Math.round((cat.used / cat.total) * 100)}%)`,
+                                    `Disponible: $${cat.remaining.toFixed(2)}`
+                                ];
+                            }
+                        },
+                        bodyFont: {
+                            family: 'Quicksand',
+                            size: 14
+                        },
+                        titleFont: {
+                            family: 'Quicksand',
+                            size: 16,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                cutout: '70%',
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
+                }
+            }
+        };
+
+        // Función para renderizar el gráfico
+        function renderChart(data) {
+            // Reutilizar configuración base
+            const config = JSON.parse(JSON.stringify(chartConfig));
+            config.data.labels = data.map(item => item.name);
+            config.data.datasets[0].data = data.map(item => item.total);
+            config.data.datasets[0].backgroundColor = data.map(item => item.color);
+            
+            // Destruir gráfico anterior si existe
+            if (budgetChart) {
+                budgetChart.destroy();
+            }
+            
+            budgetChart = new Chart(domCache.budgetChartCtx, config);
+        }
+
+        // Función para actualizar el select de categorías
+        function updateCategorySelect() {
+            const categorySelect = domCache.expenseCategory;
+            categorySelect.innerHTML = '<option value="">Selecciona categoría</option>' + 
+                currentBudget.map(cat => 
+                    `<option value="${cat.id}" ${cat.remaining <= 0 ? 'disabled' : ''}>
+                        ${cat.name} ($${cat.remaining.toFixed(2)} disponible)
+                    </option>`
+                ).join('');
+        }
+
+        // Función para registrar un gasto
+        function registerExpense() {
+            const categoryId = parseInt(domCache.expenseCategory.value);
+            const amount = parseFloat(domCache.expenseAmount.value);
+            const description = domCache.expenseDescription.value.trim();
+            
+            const errors = validateInputs([
+                {
+                    value: domCache.expenseCategory.value,
+                    type: 'number',
+                    required: true,
+                    element: domCache.expenseCategory
+                },
+                {
+                    value: domCache.expenseAmount.value,
+                    type: 'number',
+                    required: true,
+                    min: 0.01,
+                    element: domCache.expenseAmount
+                }
+            ]);
+            
+            if (errors.length > 0) {
+                errors.forEach(error => NotificationSystem.show(error, 'error'));
+                return;
+            }
+            
+            const category = currentBudget.find(cat => cat.id === categoryId);
+            
+            if (amount > category.remaining) {
+                NotificationSystem.show(
+                    `Esta categoría solo tiene $${category.remaining.toFixed(2)} disponible`,
+                    'warning',
+                    5000
+                );
+                
+                if (!confirm(`¿Registrar el gasto de todas formas?`)) {
+                    return;
+                }
+            }
+            
+            // Registrar el gasto
+            const expense = {
+                id: Date.now(),
+                categoryId,
+                categoryName: category.name,
+                amount,
+                description: description || "Sin descripción",
+                date: new Date().toISOString(),
+                type: 'expense',
+                color: category.color
+            };
+            
+            // Actualizar presupuesto
+            category.used += amount;
+            category.remaining = Math.max(0, category.remaining - amount);
+            
+            // Guardar en localStorage
+            const expenses = LocalStorageManager.get('expenses') || [];
+            expenses.unshift(expense);
+            LocalStorageManager.set('expenses', expenses);
+            LocalStorageManager.set('currentBudget', currentBudget);
+            
+            // Limpiar formulario
+            domCache.expenseAmount.value = '';
+            domCache.expenseDescription.value = '';
+            
+            // Actualizar UI
+            updateUI();
+            
+            // Mostrar notificación
+            NotificationSystem.show(
+                `Gasto de $${amount.toFixed(2)} registrado en ${category.name}`,
+                'success'
+            );
+        }
+
+        // Función para cargar las transacciones (ingresos y gastos)
+        function loadTransactions() {
+            const expenses = LocalStorageManager.get('expenses') || [];
+            const incomes = LocalStorageManager.get('incomes') || [];
+            
+            // Combinar y ordenar transacciones por fecha (más reciente primero)
+            const transactions = [...expenses, ...incomes].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            // Mostrar transacciones por periodos
+            displayTransactionsByPeriod(transactions, 'today');
+            displayTransactionsByPeriod(transactions, 'week');
+            displayTransactionsByPeriod(transactions, 'month');
+            displayTransactionsByPeriod(transactions, 'all');
+        }
+
+        // Función para mostrar transacciones por período
+        function displayTransactionsByPeriod(transactions, period) {
+            const now = new Date();
+            let filteredTransactions = [];
+            
+            switch (period) {
+                case 'today':
+                    filteredTransactions = transactions.filter(trans => {
+                        const transDate = new Date(trans.date);
+                        return transDate.toDateString() === now.toDateString();
+                    });
+                    break;
+                    
+                case 'week':
+                    const oneWeekAgo = new Date();
+                    oneWeekAgo.setDate(now.getDate() - 7);
+                    filteredTransactions = transactions.filter(trans => new Date(trans.date) >= oneWeekAgo);
+                    break;
+                    
+                case 'month':
+                    const oneMonthAgo = new Date();
+                    oneMonthAgo.setMonth(now.getMonth() - 1);
+                    filteredTransactions = transactions.filter(trans => new Date(trans.date) >= oneMonthAgo);
+                    break;
+                    
+                case 'all':
+                    filteredTransactions = [...transactions];
+                    break;
+            }
+            
+            const container = domCache.transactionContainers[period];
+            
+            if (filteredTransactions.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="12" y1="8" x2="12" y2="12"></line>
+                                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                            </svg>
+                        </div>
+                        <p>No hay transacciones registradas en este período</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = filteredTransactions.map(trans => {
+                const transDate = new Date(trans.date);
+                const isIncome = trans.type === 'income';
+                
+                return `
+                    <div class="expense-item">
+                        <div class="expense-info">
+                            <div class="expense-amount ${isIncome ? 'positive' : 'negative'}">
+                                ${isIncome ? '+' : '-'} $${trans.amount.toFixed(2)}
+                            </div>
+                            <div class="expense-category">
+                                ${isIncome ? 
+                                    '<span class="category-color" style="background: #66bb6a"></span>Ingreso' : 
+                                    `<span class="category-color" style="background: ${trans.color}"></span>${trans.categoryName}`
+                                }
+                            </div>
+                            ${!isIncome ? `<div class="expense-description">${trans.description}</div>` : ''}
+                        </div>
+                        <div class="expense-date">
+                            ${transDate.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}
+                            <br>
+                            ${transDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Función para cambiar de pestaña
+        function switchTab(tabId) {
+            // Desactivar todas las pestañas
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            Object.values(domCache.tabContents).forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Activar la pestaña seleccionada
+            document.querySelector(`.tab[data-tab="${tabId}"]`).classList.add('active');
+            domCache.tabContents[tabId].classList.add('active');
+        }
+
+        // Función para exportar datos
+        function exportData() {
+            const data = {
+                budget: currentBudget,
+                expenses: LocalStorageManager.get('expenses') || [],
+                incomes: LocalStorageManager.get('incomes') || [],
+                totalIncome: LocalStorageManager.get('totalIncome') || 0,
+                version: '1.0',
+                exportedAt: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `armonia-financiera-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            NotificationSystem.show("Datos exportados correctamente", 'success');
+        }
+
+        // Función para importar datos
+        function importData(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm(`¿Importar datos? Esto sobrescribirá tu información actual.`)) {
+                        if (data.budget) LocalStorageManager.set('currentBudget', data.budget);
+                        if (data.expenses) LocalStorageManager.set('expenses', data.expenses);
+                        if (data.incomes) LocalStorageManager.set('incomes', data.incomes);
+                        if (data.totalIncome) LocalStorageManager.set('totalIncome', data.totalIncome);
+                        
+                        loadBudget();
+                        loadTransactions();
+                        NotificationSystem.show("Datos importados correctamente", 'success');
+                    }
+                } catch (error) {
+                    NotificationSystem.show("Error al importar datos: Archivo inválido", 'error');
+                    console.error(error);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Función para actualizar toda la UI
+        function updateUI() {
+            if (currentBudget) {
+                displayBudget(currentBudget);
+                updateCategorySelect();
+            }
+            loadTransactions();
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar datos iniciales
+            loadBudget();
+            loadTransactions();
+            
+            // Configurar eventos
+            domCache.calculateBtn.addEventListener('click', calculateBudget);
+            domCache.addIncomeBtn.addEventListener('click', addIncome);
+            domCache.registerExpenseBtn.addEventListener('click', registerExpense);
+            domCache.exportBtn.addEventListener('click', exportData);
+            domCache.importInput.addEventListener('change', importData);
+            
+            // Delegación de eventos para las pestañas
+            domCache.tabsContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('tab')) {
+                    const tabId = e.target.getAttribute('data-tab');
+                    switchTab(tabId);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
